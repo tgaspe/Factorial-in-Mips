@@ -2,10 +2,11 @@
 # 	Theodoro Gasperin Terra Camargo 260842764
 
 	.data
-msg1:	.asciiz "Please input an integer value greater than or equal to 0: "
-msg2:	.asciiz "The value you entered is less than zero.\nThis program only works with values greater than or equal to zero."
-msg3:	.asciiz "Result of factorial: "
-	
+msg1:	.asciiz "\nPlease input an integer value greater than or equal to 0: "
+msg2:	.asciiz "\nThe value you entered is less than zero.\nThis program only works with values greater than or equal to zero."
+msg3:	.asciiz "\nYour input: "
+msg4:	.asciiz "\nThe factorial is: "	
+msg5:	.asciiz "\nWould you like to go again(Y or N)? "
 	.text
 main:
 	#printing first message
@@ -17,6 +18,7 @@ main:
 	li $v0, 5
 	syscall
 	move $t0, $v0		# x = user input
+	move $s1, $t0		# Saving x in s1 as well
 	
 	ble $t0, $0, Error	# Error if x less equal than 0
 	
@@ -28,14 +30,34 @@ main:
 	move $s0, $v0		# Saving result of factorial into $s0 bcs v0 will be used to print
 	addiu $sp, $sp, 4	# Resest the Stack pointer to its original value (That is pop the s0,1
 	
-	#Printing Result message
+	#Printing user input message
 	la $a0, msg3
+	li $v0, 4
+	syscall
+	# Printing input
+	move $a0, $s1
+	li $v0, 1
+	syscall
+	
+	#Printing Result message
+	la $a0, msg4
 	li $v0, 4
 	syscall
 	# Printing factorial result
 	move $a0, $s0
 	li $v0, 1
 	syscall
+	
+	#Printing go again message
+	la $a0, msg5
+	li $v0, 4
+	syscall
+	
+	# Getting Yes or No char
+	li $v0, 12
+	syscall
+	
+	beq $v0, 89, main
 	
 	j Exit
 
@@ -57,14 +79,15 @@ factorial:
 	addiu $sp, $sp, -4
 	sw $ra, 0($sp)
 	
-	##
+	#-----------------------------------
 	# if x == 0:
 	#	return 1
 	# else:
 	#	return x * factorial (x - 1)
-	##
+	#-----------------------------------
 	
-	beq $t0, $zero, base_case	# if x == 0: go to basecase
+	# if x == 0: go to basecase
+	beq $t0, $zero, base_case	
 	
 	addiu $sp, $sp, -4
 	sw $t0, 0($sp)		# pushing x into the stack
